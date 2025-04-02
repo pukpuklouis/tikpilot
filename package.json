@@ -1,14 +1,23 @@
 {
   "name": "tikpilot",
   "version": "1.0.0",
+  "private": true,
   "description": "an application where an AI agent mimics human interaction (e.g., scrolling, liking, commenting, posting) on TikTok-like platforms, controlling multiple accounts via emulators, with a user-friendly frontend to manage setups",
   "author": "pukpuklouis",
   "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "tools/*"
+  ],
   "scripts": {
-    "dev": "node scripts/dev.js",
-    "list": "node scripts/dev.js list",
-    "generate": "node scripts/dev.js generate",
-    "parse-prd": "node scripts/dev.js parse-prd"
+    "dev": "pnpm --filter @tikpilot/frontend dev",
+    "dev:backend": "pnpm --filter @tikpilot/backend dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "clean": "pnpm -r clean",
+    "task": "pnpm --filter @tikpilot/scripts node dev.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
@@ -21,5 +30,11 @@
     "gradient-string": "^2.0.2",
     "cli-table3": "^0.6.3",
     "ora": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0"
   }
 }

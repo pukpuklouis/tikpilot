@@ -1,0 +1,144 @@
+# Task ID: 11
+# Title: Restructure Repository as Proper Monorepo
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Reorganize the current repository into a well-structured monorepo with appropriate workspace configuration, preventing nested git repositories and ensuring clean dependency management.
+# Details:
+This task involves restructuring the entire codebase into a proper monorepo setup:
+
+1. Create a root-level workspace configuration using a tool appropriate for the stack (e.g., npm/yarn workspaces, pnpm, Lerna, Nx, or Cargo workspaces for Rust)
+
+2. Organize the codebase into logical packages/modules with clear boundaries:
+   - `/packages/` or `/apps/` directory for main applications
+   - `/libs/` or `/shared/` for shared code
+   - Create appropriate separation between frontend, backend, and the Playwright service
+
+3. Implement proper `.gitignore` files at appropriate levels to prevent accidental nested git repositories
+
+4. Add a git pre-commit hook that checks for and prevents nested `.git` directories
+
+5. Configure dependency management between packages with explicit declarations
+
+6. Create a root-level package.json or equivalent workspace definition file
+
+7. Update build scripts, CI/CD pipelines, and documentation to reflect the new structure
+
+8. Ensure all existing functionality continues to work with the new structure
+
+9. Document the repository structure and contribution guidelines in a README.md file
+
+# Test Strategy:
+Testing should verify both the structure and functionality of the monorepo:
+
+1. Structural validation:
+   - Run a script that traverses the repository and verifies no nested .git directories exist
+   - Verify workspace configuration is valid by running the appropriate tool's validation command
+   - Check that all packages/modules can be built from the root level
+   - Validate that the pre-commit hook successfully blocks creation of nested git repositories
+
+2. Functional validation:
+   - Execute all existing tests to ensure functionality is preserved
+   - Verify cross-package dependencies work correctly by making a change in a shared package and confirming it propagates
+   - Test the build process for all packages from the root level
+   - Validate that CI/CD pipelines successfully build and test the restructured codebase
+
+3. Developer experience check:
+   - Have a team member clone the repository fresh and verify they can set up the development environment following the updated documentation
+   - Verify that common development workflows (adding features, running tests) work as expected with the new structure
+
+# Subtasks:
+## 1. Set up workspace configuration and directory structure [done]
+### Dependencies: None
+### Description: Create the basic monorepo structure with appropriate workspace configuration and organize the codebase into logical directories.
+### Details:
+Implementation steps:
+
+1. Determine the appropriate workspace tool based on the current tech stack (e.g., npm/yarn workspaces, pnpm, Lerna, Nx, or Cargo workspaces for Rust).
+
+2. Create a root-level workspace configuration file (e.g., package.json with workspaces field, pnpm-workspace.yaml, etc.).
+
+3. Create the following directory structure:
+   - `/packages/` or `/apps/` for main applications
+   - `/libs/` or `/shared/` for shared code
+   - Separate directories for frontend, backend, and Playwright service
+
+4. Move existing code into the new directory structure, ensuring minimal changes to code itself at this stage.
+
+5. Update import/require paths in moved files to reflect the new structure.
+
+6. Verify the basic structure works by running a simple build or test command.
+
+Testing approach:
+- Manually verify that the directory structure follows the planned layout
+- Run existing tests to ensure basic functionality still works
+- Test that the workspace tool recognizes all packages
+
+## 2. Configure dependency management and build process [done]
+### Dependencies: 11.1
+### Description: Set up proper dependency management between packages and update build configurations to work with the new monorepo structure.
+### Details:
+Implementation steps:
+
+1. Update each package's dependency declarations to explicitly list dependencies on other internal packages.
+
+2. Configure package.json (or equivalent) files in each package with:
+   - Correct name, version, and description
+   - Proper dependencies (both external and internal)
+   - Package-specific scripts
+
+3. Create or update root-level build scripts that can build all packages or specific subsets.
+
+4. Implement a dependency graph to ensure packages build in the correct order.
+
+5. Update any CI/CD pipeline configurations to work with the new structure:
+   - Update build commands
+   - Adjust paths for artifacts and test results
+   - Configure caching for dependencies
+
+6. Set up any necessary tooling for cross-package development (e.g., TypeScript project references, Webpack configurations).
+
+7. Test the complete build process to ensure all packages build correctly.
+
+Testing approach:
+- Run a complete build from the root and verify all packages build successfully
+- Test individual package builds to ensure they work independently
+- Verify that changes in one package trigger appropriate rebuilds of dependent packages
+- Run existing integration tests to confirm cross-package functionality works
+
+## 3. Implement Git configuration, hooks, and documentation [done]
+### Dependencies: 11.1, 11.2
+### Description: Set up Git-related configurations to prevent nested repositories and create comprehensive documentation for the monorepo structure.
+### Details:
+Implementation steps:
+
+1. Create appropriate `.gitignore` files:
+   - Root-level gitignore for common patterns
+   - Package-specific gitignore files as needed
+
+2. Implement a git pre-commit hook that scans for and prevents nested `.git` directories:
+   - Create a script that searches for nested .git directories
+   - Configure the hook using husky or a similar tool
+   - Test the hook with a simulated nested git repository
+
+3. Create comprehensive documentation in README.md files:
+   - Root-level README explaining the overall repository structure
+   - Guidelines for adding new packages
+   - Development workflow instructions
+   - Build and test procedures
+
+4. Add CONTRIBUTING.md with detailed contribution guidelines:
+   - How to set up the development environment
+   - How to create and test changes across packages
+   - Code style and review process
+
+5. Update any existing documentation to reflect the new structure.
+
+6. Create a simple graphical representation of the package dependencies for documentation.
+
+Testing approach:
+- Test the pre-commit hook by attempting to create a nested git repository
+- Have team members review documentation for clarity and completeness
+- Verify all links in documentation work correctly
+- Test the development workflow by following the documented steps on a clean environment
+

@@ -1,0 +1,19 @@
+{
+  "name": "@tikpilot/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src --ext ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@tikpilot/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

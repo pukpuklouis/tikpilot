@@ -1,0 +1,18 @@
+# Task ID: 6
+# Title: Implement Account Management System
+# Status: pending
+# Dependencies: 1, 4
+# Priority: medium
+# Description: Create functionality to store, assign, and manage TikTok/Instagram accounts across emulators.
+# Details:
+1. Design database schema for account storage
+2. Implement account CRUD operations in Rust
+3. Create API endpoints for account management
+4. Develop account-emulator mapping functionality
+5. Implement secure credential storage with encryption
+6. Create account status tracking
+7. Add batch import/export functionality
+8. Implement account rotation strategies
+
+# Test Strategy:
+Write unit tests for database operations. Test account CRUD operations via API. Verify encryption works correctly for credentials. Test mapping accounts to emulators and rotation strategies.

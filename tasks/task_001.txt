@@ -1,0 +1,17 @@
+# Task ID: 1
+# Title: Set up Rust Backend with Actix Web
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Create the foundational Rust backend service with Actix Web framework and initial API structure.
+# Details:
+1. Initialize a new Rust project with cargo
+2. Add Actix Web, Tokio, and other necessary dependencies
+3. Create a basic server structure with health check endpoint
+4. Set up logging and error handling
+5. Implement basic configuration loading from environment variables
+6. Create a modular project structure (routes, handlers, models)
+7. Set up a simple SQLite database connection for storing account configurations
+
+# Test Strategy:
+Write unit tests for API endpoints using Actix's testing utilities. Create a health check endpoint and verify it returns 200 OK. Test configuration loading from different sources.

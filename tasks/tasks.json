@@ -1,0 +1,245 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Set up Rust Backend with Actix Web",
+      "description": "Create the foundational Rust backend service with Actix Web framework and initial API structure.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high",
+      "details": "1. Initialize a new Rust project with cargo\n2. Add Actix Web, Tokio, and other necessary dependencies\n3. Create a basic server structure with health check endpoint\n4. Set up logging and error handling\n5. Implement basic configuration loading from environment variables\n6. Create a modular project structure (routes, handlers, models)\n7. Set up a simple SQLite database connection for storing account configurations",
+      "testStrategy": "Write unit tests for API endpoints using Actix's testing utilities. Create a health check endpoint and verify it returns 200 OK. Test configuration loading from different sources."
+    },
+    {
+      "id": 2,
+      "title": "Develop Remix Frontend with TailwindCSS",
+      "description": "Create the web interface using Remix framework with TailwindCSS and shadcn components.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high",
+      "details": "1. Initialize a new Remix project\n2. Configure TailwindCSS and shadcn/ui components\n3. Create layout components (header, sidebar, main content area)\n4. Set up routing for main application pages\n5. Create placeholder pages for Dashboard, Emulator Setup, and Action Control\n6. Implement responsive design for desktop and mobile viewing\n7. Set up basic state management with Zustand\n8. Configure API client for communicating with the backend",
+      "testStrategy": "Use Vitest for component testing. Verify responsive layouts work properly across different screen sizes. Test navigation between routes and initial loading states.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Initialize Remix Project with TailwindCSS and shadcn/ui",
+          "description": "Set up the foundation of the application by initializing a Remix project and configuring TailwindCSS and shadcn/ui components.",
+          "dependencies": [],
+          "details": "Implementation details:\n1. Create a new Remix project using `npx create-remix@latest`\n2. Install TailwindCSS dependencies: `npm install -D tailwindcss postcss autoprefixer`\n3. Initialize TailwindCSS: `npx tailwindcss init -p`\n4. Configure TailwindCSS by updating the tailwind.config.js file to include paths to template files\n5. Add TailwindCSS directives to your CSS file\n6. Set up shadcn/ui by following their Remix integration guide\n7. Install and configure necessary shadcn components (button, card, dialog, etc.)\n8. Create a basic theme configuration\n9. Test the setup by creating a simple page with TailwindCSS styles and shadcn components\n\nTesting approach:\n- Verify that the Remix application builds without errors\n- Confirm TailwindCSS classes are properly applied\n- Ensure shadcn components render correctly with proper styling",
+          "status": "done",
+          "parentTaskId": 2
+        },
+        {
+          "id": 2,
+          "title": "Create Layout Structure and Application Routing",
+          "description": "Develop the core layout components and establish the routing structure for the application.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation details:\n1. Create layout components:\n   - Header component with application title and navigation\n   - Sidebar component for main navigation links\n   - Main content area with proper padding and responsive behavior\n   - Footer component if needed\n2. Set up responsive design using TailwindCSS breakpoints\n3. Implement mobile-friendly navigation (collapsible sidebar)\n4. Configure route structure in Remix:\n   - Set up root layout in app/root.tsx\n   - Create route files for Dashboard, Emulator Setup, and Action Control\n   - Implement nested routing where appropriate\n5. Create placeholder pages with basic content for each route\n6. Add navigation between pages using Remix Link component\n\nTesting approach:\n- Test responsive behavior across different screen sizes\n- Verify that navigation works correctly between all pages\n- Ensure layout components adapt properly on mobile devices\n- Check that the route structure matches the application requirements",
+          "status": "done",
+          "parentTaskId": 2
+        },
+        {
+          "id": 3,
+          "title": "Implement State Management and API Client",
+          "description": "Set up Zustand for state management and configure an API client for backend communication.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implementation details:\n1. Install Zustand: `npm install zustand`\n2. Create store modules for different state concerns:\n   - Create a main application store for global state\n   - Set up specific stores for features (e.g., emulator settings, action controls)\n3. Implement basic state management patterns with Zustand:\n   - Define state properties and update functions\n   - Create selectors for accessing state\n4. Set up API client:\n   - Install Axios or similar: `npm install axios`\n   - Create an API client module with base configuration\n   - Implement API endpoints as functions\n   - Add request/response interceptors for error handling\n5. Connect state management with API calls\n6. Add loading states and error handling\n7. Create utility hooks for common data fetching patterns\n\nTesting approach:\n- Test state management by creating simple UI controls that modify state\n- Mock API responses to test client functionality\n- Verify that state updates correctly when API calls succeed or fail\n- Test error handling and loading states",
+          "status": "done",
+          "parentTaskId": 2
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Containerize Application with Docker",
+      "description": "Create Docker configuration for backend, frontend, and development environment.",
+      "status": "pending",
+      "dependencies": [
+        1,
+        2
+      ],
+      "priority": "high",
+      "details": "1. Create a multi-stage Dockerfile for the Rust backend\n2. Create a Dockerfile for the Remix frontend\n3. Set up Docker Compose configuration for local development\n4. Configure volume mounting for development code\n5. Set up environment variables for services\n6. Configure networking between containers\n7. Add health checks for services\n8. Optimize container sizes using multi-stage builds",
+      "testStrategy": "Verify containers start successfully with docker-compose up. Test communication between services. Ensure volumes are properly mounted for development. Verify hot-reloading works in development mode.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create Docker configuration for the Rust backend",
+          "description": "Implement a multi-stage Dockerfile for the Rust backend that optimizes container size while ensuring proper build and runtime environments.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Create a Dockerfile in the backend directory\n2. Set up a multi-stage build with:\n   - First stage: Use rust:slim as build image\n   - Install build dependencies and compile the application\n   - Second stage: Use debian:slim-bookworm as runtime image\n   - Copy only the compiled binary and necessary runtime files\n3. Configure proper WORKDIR, USER (non-root), and ENTRYPOINT\n4. Add health check using HEALTHCHECK instruction that tests the application's /health endpoint\n5. Optimize the image by:\n   - Using .dockerignore to exclude unnecessary files\n   - Minimizing layers with combined RUN commands\n   - Setting appropriate environment variables\n\nTesting approach:\n1. Build the Docker image: `docker build -t backend:latest ./backend`\n2. Run the container: `docker run -p 8080:8080 backend:latest`\n3. Verify the application starts correctly\n4. Test the health check: `docker inspect --format='{{.State.Health.Status}}' <container_id>`\n5. Check image size: `docker images backend:latest`",
+          "status": "pending",
+          "parentTaskId": 3
+        },
+        {
+          "id": 2,
+          "title": "Create Docker configuration for the Remix frontend",
+          "description": "Implement a Dockerfile for the Remix frontend that handles both build and runtime environments efficiently.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Create a Dockerfile in the frontend directory\n2. Set up a multi-stage build with:\n   - First stage: Use node:18-alpine as build image\n   - Install dependencies with npm/yarn and build the Remix application\n   - Second stage: Use node:18-alpine as runtime image\n   - Copy built assets and necessary runtime files\n3. Configure proper WORKDIR, USER (non-root), and CMD\n4. Add health check using HEALTHCHECK instruction that tests the application's base URL\n5. Optimize the image by:\n   - Using .dockerignore to exclude node_modules, .git, etc.\n   - Caching node_modules for faster builds\n   - Setting NODE_ENV=production for runtime\n\nTesting approach:\n1. Build the Docker image: `docker build -t frontend:latest ./frontend`\n2. Run the container: `docker run -p 3000:3000 frontend:latest`\n3. Verify the application starts and is accessible at http://localhost:3000\n4. Test the health check: `docker inspect --format='{{.State.Health.Status}}' <container_id>`\n5. Check image size: `docker images frontend:latest`",
+          "status": "pending",
+          "parentTaskId": 3
+        },
+        {
+          "id": 3,
+          "title": "Set up Docker Compose for local development environment",
+          "description": "Create a Docker Compose configuration that orchestrates the backend and frontend containers with proper networking, volume mounting, and environment variables for development.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implementation steps:\n1. Create a docker-compose.yml file in the project root\n2. Define services for:\n   - Backend service using the Dockerfile from subtask 1\n   - Frontend service using the Dockerfile from subtask 2\n   - Any additional services needed (database, cache, etc.)\n3. Configure networking:\n   - Create a custom network for inter-service communication\n   - Map appropriate ports to host machine\n   - Set service names for DNS resolution\n4. Set up volume mounts for development:\n   - Mount backend source code directory to enable hot-reloading\n   - Mount frontend source code directory for live development\n   - Use named volumes for persistent data (if applicable)\n5. Configure environment variables:\n   - Create a .env file for shared variables\n   - Set service-specific environment variables in the compose file\n   - Include development-specific settings\n6. Add depends_on directives to establish proper startup order\n7. Include healthcheck configurations to ensure services are ready\n\nTesting approach:\n1. Start the environment: `docker-compose up -d`\n2. Verify all services start correctly: `docker-compose ps`\n3. Test backend API access from frontend container\n4. Make a code change in both frontend and backend to verify hot-reloading\n5. Test environment variables are correctly passed to containers\n6. Validate network connectivity between services\n7. Shut down and restart to verify persistence: `docker-compose down && docker-compose up -d`",
+          "status": "pending",
+          "parentTaskId": 3
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Implement Emulator Management System",
+      "description": "Develop functionality to spawn, manage, and control Android emulators via ADB.",
+      "status": "pending",
+      "dependencies": [
+        1,
+        3
+      ],
+      "priority": "high",
+      "details": "1. Create a Rust module for emulator management\n2. Implement functions to start/stop emulators using std::process::Command\n3. Create API endpoints to manage emulator instances\n4. Set up port mapping for multiple emulator instances\n5. Implement emulator status tracking\n6. Create functions to install apps on emulators\n7. Develop error handling for emulator operations\n8. Store emulator configurations in SQLite database",
+      "testStrategy": "Create integration tests with mock emulator processes. Test starting/stopping multiple emulator instances. Verify port assignments work correctly. Test error handling when emulators fail to start."
+    },
+    {
+      "id": 5,
+      "title": "Create Playwright Microservice",
+      "description": "Develop a Node.js microservice using Playwright for browser automation and control.",
+      "status": "pending",
+      "dependencies": [
+        3
+      ],
+      "priority": "medium",
+      "details": "1. Set up a Node.js Express project for the Playwright service\n2. Install and configure Playwright with Chromium support\n3. Create API endpoints for common actions (scroll, like, comment)\n4. Implement connection to emulator WebViews\n5. Add browser fingerprinting randomization\n6. Create Docker configuration for the service\n7. Implement error handling and logging\n8. Add health check endpoint",
+      "testStrategy": "Create unit tests for Playwright actions. Test connecting to mock WebView endpoints. Verify scrolling, clicking, and other interactions work correctly. Test error scenarios like connection failures."
+    },
+    {
+      "id": 6,
+      "title": "Implement Account Management System",
+      "description": "Create functionality to store, assign, and manage TikTok/Instagram accounts across emulators.",
+      "status": "pending",
+      "dependencies": [
+        1,
+        4
+      ],
+      "priority": "medium",
+      "details": "1. Design database schema for account storage\n2. Implement account CRUD operations in Rust\n3. Create API endpoints for account management\n4. Develop account-emulator mapping functionality\n5. Implement secure credential storage with encryption\n6. Create account status tracking\n7. Add batch import/export functionality\n8. Implement account rotation strategies",
+      "testStrategy": "Write unit tests for database operations. Test account CRUD operations via API. Verify encryption works correctly for credentials. Test mapping accounts to emulators and rotation strategies."
+    },
+    {
+      "id": 7,
+      "title": "Develop AI Behavior Simulation Module",
+      "description": "Create the core AI logic to mimic human-like interaction patterns across TikTok/Instagram.",
+      "status": "pending",
+      "dependencies": [
+        4,
+        5
+      ],
+      "priority": "high",
+      "details": "1. Implement randomized timing for actions\n2. Create probability-based decision making for interactions\n3. Develop natural scrolling patterns with variable speeds\n4. Implement session duration variability\n5. Create engagement probability models\n6. Add randomized comment generation\n7. Implement viewing time distributions for content\n8. Create detection avoidance techniques",
+      "testStrategy": "Write unit tests for randomization functions. Create simulation tests to verify behavior patterns. Test timing distributions for actions. Verify comment generation produces realistic results."
+    },
+    {
+      "id": 8,
+      "title": "Integrate Backend with Playwright Service",
+      "description": "Connect the Rust backend with the Playwright microservice for controlling emulators.",
+      "status": "pending",
+      "dependencies": [
+        5,
+        7
+      ],
+      "priority": "medium",
+      "details": "1. Implement HTTP client in Rust to communicate with Playwright service\n2. Create proxy endpoints in Rust for Playwright actions\n3. Develop error handling for Playwright service communication\n4. Implement retry logic for failed actions\n5. Add request queuing for high-volume scenarios\n6. Create WebSocket connection for real-time updates\n7. Implement service discovery for multiple Playwright instances\n8. Add metrics collection for action performance",
+      "testStrategy": "Create integration tests between Rust and Playwright service. Test proxy endpoints with mock responses. Verify error handling and retry logic works correctly. Test WebSocket communication for real-time updates."
+    },
+    {
+      "id": 9,
+      "title": "Complete Frontend Dashboard and Controls",
+      "description": "Finalize the user interface with full functionality for monitoring and controlling emulators.",
+      "status": "pending",
+      "dependencies": [
+        2,
+        6,
+        8
+      ],
+      "priority": "medium",
+      "details": "1. Implement Dashboard with active emulator overview\n2. Create Emulator Setup form with configuration options\n3. Develop Action Control interface with behavior adjustments\n4. Add real-time status updates via WebSocket\n5. Implement account management interface\n6. Create visualizations for emulator activity\n7. Add notification system for important events\n8. Implement user preferences and settings",
+      "testStrategy": "Create end-to-end tests with Playwright Test. Verify all UI components render correctly. Test form submissions and validation. Verify real-time updates appear correctly. Test responsive design across device sizes."
+    },
+    {
+      "id": 10,
+      "title": "Implement Production Deployment Configuration",
+      "description": "Finalize the application for production deployment with scalability and monitoring.",
+      "status": "pending",
+      "dependencies": [
+        3,
+        8,
+        9
+      ],
+      "priority": "low",
+      "details": "1. Create production Docker Compose configuration\n2. Implement resource limits for containers\n3. Add monitoring with Prometheus and Grafana\n4. Set up logging aggregation\n5. Configure security hardening for containers\n6. Implement backup strategy for database\n7. Create deployment documentation\n8. Add Kubernetes configuration (optional)",
+      "testStrategy": "Test production deployment in staging environment. Verify resource limits work correctly. Test monitoring alerts and dashboards. Verify logging captures all necessary information. Test backup and restore procedures."
+    },
+    {
+      "id": 11,
+      "title": "Restructure Repository as Proper Monorepo",
+      "description": "Reorganize the current repository into a well-structured monorepo with appropriate workspace configuration, preventing nested git repositories and ensuring clean dependency management.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "medium",
+      "details": "This task involves restructuring the entire codebase into a proper monorepo setup:\n\n1. Create a root-level workspace configuration using a tool appropriate for the stack (e.g., npm/yarn workspaces, pnpm, Lerna, Nx, or Cargo workspaces for Rust)\n\n2. Organize the codebase into logical packages/modules with clear boundaries:\n   - `/packages/` or `/apps/` directory for main applications\n   - `/libs/` or `/shared/` for shared code\n   - Create appropriate separation between frontend, backend, and the Playwright service\n\n3. Implement proper `.gitignore` files at appropriate levels to prevent accidental nested git repositories\n\n4. Add a git pre-commit hook that checks for and prevents nested `.git` directories\n\n5. Configure dependency management between packages with explicit declarations\n\n6. Create a root-level package.json or equivalent workspace definition file\n\n7. Update build scripts, CI/CD pipelines, and documentation to reflect the new structure\n\n8. Ensure all existing functionality continues to work with the new structure\n\n9. Document the repository structure and contribution guidelines in a README.md file",
+      "testStrategy": "Testing should verify both the structure and functionality of the monorepo:\n\n1. Structural validation:\n   - Run a script that traverses the repository and verifies no nested .git directories exist\n   - Verify workspace configuration is valid by running the appropriate tool's validation command\n   - Check that all packages/modules can be built from the root level\n   - Validate that the pre-commit hook successfully blocks creation of nested git repositories\n\n2. Functional validation:\n   - Execute all existing tests to ensure functionality is preserved\n   - Verify cross-package dependencies work correctly by making a change in a shared package and confirming it propagates\n   - Test the build process for all packages from the root level\n   - Validate that CI/CD pipelines successfully build and test the restructured codebase\n\n3. Developer experience check:\n   - Have a team member clone the repository fresh and verify they can set up the development environment following the updated documentation\n   - Verify that common development workflows (adding features, running tests) work as expected with the new structure",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Set up workspace configuration and directory structure",
+          "description": "Create the basic monorepo structure with appropriate workspace configuration and organize the codebase into logical directories.",
+          "dependencies": [],
+          "details": "Implementation steps:\n\n1. Determine the appropriate workspace tool based on the current tech stack (e.g., npm/yarn workspaces, pnpm, Lerna, Nx, or Cargo workspaces for Rust).\n\n2. Create a root-level workspace configuration file (e.g., package.json with workspaces field, pnpm-workspace.yaml, etc.).\n\n3. Create the following directory structure:\n   - `/packages/` or `/apps/` for main applications\n   - `/libs/` or `/shared/` for shared code\n   - Separate directories for frontend, backend, and Playwright service\n\n4. Move existing code into the new directory structure, ensuring minimal changes to code itself at this stage.\n\n5. Update import/require paths in moved files to reflect the new structure.\n\n6. Verify the basic structure works by running a simple build or test command.\n\nTesting approach:\n- Manually verify that the directory structure follows the planned layout\n- Run existing tests to ensure basic functionality still works\n- Test that the workspace tool recognizes all packages",
+          "status": "done",
+          "parentTaskId": 11
+        },
+        {
+          "id": 2,
+          "title": "Configure dependency management and build process",
+          "description": "Set up proper dependency management between packages and update build configurations to work with the new monorepo structure.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation steps:\n\n1. Update each package's dependency declarations to explicitly list dependencies on other internal packages.\n\n2. Configure package.json (or equivalent) files in each package with:\n   - Correct name, version, and description\n   - Proper dependencies (both external and internal)\n   - Package-specific scripts\n\n3. Create or update root-level build scripts that can build all packages or specific subsets.\n\n4. Implement a dependency graph to ensure packages build in the correct order.\n\n5. Update any CI/CD pipeline configurations to work with the new structure:\n   - Update build commands\n   - Adjust paths for artifacts and test results\n   - Configure caching for dependencies\n\n6. Set up any necessary tooling for cross-package development (e.g., TypeScript project references, Webpack configurations).\n\n7. Test the complete build process to ensure all packages build correctly.\n\nTesting approach:\n- Run a complete build from the root and verify all packages build successfully\n- Test individual package builds to ensure they work independently\n- Verify that changes in one package trigger appropriate rebuilds of dependent packages\n- Run existing integration tests to confirm cross-package functionality works",
+          "status": "done",
+          "parentTaskId": 11
+        },
+        {
+          "id": 3,
+          "title": "Implement Git configuration, hooks, and documentation",
+          "description": "Set up Git-related configurations to prevent nested repositories and create comprehensive documentation for the monorepo structure.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implementation steps:\n\n1. Create appropriate `.gitignore` files:\n   - Root-level gitignore for common patterns\n   - Package-specific gitignore files as needed\n\n2. Implement a git pre-commit hook that scans for and prevents nested `.git` directories:\n   - Create a script that searches for nested .git directories\n   - Configure the hook using husky or a similar tool\n   - Test the hook with a simulated nested git repository\n\n3. Create comprehensive documentation in README.md files:\n   - Root-level README explaining the overall repository structure\n   - Guidelines for adding new packages\n   - Development workflow instructions\n   - Build and test procedures\n\n4. Add CONTRIBUTING.md with detailed contribution guidelines:\n   - How to set up the development environment\n   - How to create and test changes across packages\n   - Code style and review process\n\n5. Update any existing documentation to reflect the new structure.\n\n6. Create a simple graphical representation of the package dependencies for documentation.\n\nTesting approach:\n- Test the pre-commit hook by attempting to create a nested git repository\n- Have team members review documentation for clarity and completeness\n- Verify all links in documentation work correctly\n- Test the development workflow by following the documented steps on a clean environment",
+          "status": "done",
+          "parentTaskId": 11
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "projectName": "TikPilot Implementation",
+    "totalTasks": 10,
+    "sourceFile": "scripts/prd.md",
+    "generatedAt": "2023-11-19"
+  }
+}

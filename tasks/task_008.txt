@@ -1,0 +1,18 @@
+# Task ID: 8
+# Title: Integrate Backend with Playwright Service
+# Status: pending
+# Dependencies: 5, 7
+# Priority: medium
+# Description: Connect the Rust backend with the Playwright microservice for controlling emulators.
+# Details:
+1. Implement HTTP client in Rust to communicate with Playwright service
+2. Create proxy endpoints in Rust for Playwright actions
+3. Develop error handling for Playwright service communication
+4. Implement retry logic for failed actions
+5. Add request queuing for high-volume scenarios
+6. Create WebSocket connection for real-time updates
+7. Implement service discovery for multiple Playwright instances
+8. Add metrics collection for action performance
+
+# Test Strategy:
+Create integration tests between Rust and Playwright service. Test proxy endpoints with mock responses. Verify error handling and retry logic works correctly. Test WebSocket communication for real-time updates.
