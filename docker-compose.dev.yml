@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  backend:
+    # Add cargo-watch for development hot-reloading
+    build:
+      dockerfile: Dockerfile
+      target: builder
+      args:
+        - CARGO_INSTALL_ROOT=/usr/local/cargo
+      context: ./apps/backend
+    command: sh -c "cargo install cargo-watch && cargo watch -x run"
+
+  frontend:
+    # Development-specific frontend settings
+    build:
+      dockerfile: Dockerfile
+      target: builder
+      context: ./apps/frontend
+    environment:
+      - VITE_DEV_SERVER_PORT=3000
+      - VITE_DEV_SERVER_HOST=0.0.0.0
+      - WATCHPACK_POLLING=true  # Better hot reload in Docker

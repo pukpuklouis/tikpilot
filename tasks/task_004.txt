@@ -16,3 +16,115 @@
 
 # Test Strategy:
 Create integration tests with mock emulator processes. Test starting/stopping multiple emulator instances. Verify port assignments work correctly. Test error handling when emulators fail to start.
+
+# Subtasks:
+## 1. Implement Core Emulator Control Module [pending]
+### Dependencies: None
+### Description: Create a foundational Rust module that provides low-level functions to spawn, monitor, and terminate Android emulators using ADB commands.
+### Details:
+1. Create a new Rust module `emulator_control.rs` with the following components:
+- Implement a struct `EmulatorInstance` to track emulator metadata (AVD name, port, process ID, status)
+- Create functions to execute ADB and emulator commands using `std::process::Command`:
+  * `start_emulator(avd_name: &str, port: u16)` - Start an emulator with hardware acceleration flags (-gpu auto, using HAXM/KVM)
+  * `stop_emulator(port: u16)` - Gracefully terminate an emulator instance
+  * `check_emulator_status(port: u16)` - Verify if an emulator is running and responsive
+  * `list_running_emulators()` - Return a list of all active emulator instances
+  * `wait_for_emulator_boot(port: u16)` - Poll until emulator is fully booted
+2. Implement proper error handling using Rust's Result type with custom error enums
+3. Add logging for all emulator operations
+4. Write unit tests using command mocking to verify correct command execution
+5. Ensure the module handles edge cases like ADB server failures with automatic restarts
+
+Testing approach: Create mock implementations of `std::process::Command` to test the module without actually spawning emulators. Verify the correct commands are constructed and executed.
+
+## 2. Develop Port Management and Multi-Instance Handling [pending]
+### Dependencies: 4.1
+### Description: Create a system to manage port allocation and handle multiple concurrent emulator instances without conflicts.
+### Details:
+1. Create a `port_manager.rs` module with the following functionality:
+- Implement a `PortManager` struct that tracks and allocates available ports for emulators
+- Add functions to:
+  * `allocate_port()` - Find and reserve the next available port (starting from 5554, incrementing by 2)
+  * `release_port(port: u16)` - Mark a port as available when an emulator is stopped
+  * `get_console_port(adb_port: u16)` - Calculate the corresponding console port (ADB port + 1)
+  * `is_port_available(port: u16)` - Check if a port is already in use
+2. Implement the Singleton pattern for the PortManager to ensure consistent port allocation
+3. Add port validation to verify ports are in valid range (5554-5682) and not already in use
+4. Create a multi-instance coordinator that:
+  * Prevents AVD name conflicts by appending unique identifiers
+  * Manages resource allocation for multiple emulators
+  * Implements throttling to prevent system overload
+5. Implement thread-safe access to port resources using Rust's synchronization primitives (Mutex, Arc)
+
+Testing approach: Write unit tests that verify port allocation logic, concurrent access patterns, and proper cleanup. Test edge cases like exhausting all available ports.
+
+## 3. Implement Application Installation and Control Functions [pending]
+### Dependencies: 4.1
+### Description: Develop functionality to install and manage applications on emulator instances, including APK installation and basic app interaction.
+### Details:
+1. Create an `app_manager.rs` module with the following functions:
+- `install_apk(port: u16, apk_path: &str)` - Install an APK on a specific emulator
+- `uninstall_app(port: u16, package_name: &str)` - Remove an application
+- `start_app(port: u16, package_name: &str, activity: &str)` - Launch a specific app activity
+- `stop_app(port: u16, package_name: &str)` - Force stop an application
+- `check_if_installed(port: u16, package_name: &str)` - Verify if an app is installed
+- `get_installed_apps(port: u16)` - List all installed applications
+2. Implement input simulation functions:
+- `input_tap(port: u16, x: u32, y: u32)` - Simulate touch at coordinates
+- `input_text(port: u16, text: &str)` - Input text
+- `input_keyevent(port: u16, keycode: u32)` - Send key events
+3. Add file transfer capabilities:
+- `push_file(port: u16, local_path: &str, device_path: &str)` - Copy file to emulator
+- `pull_file(port: u16, device_path: &str, local_path: &str)` - Copy file from emulator
+4. Implement screenshot and screen recording functionality
+5. Add error handling for common APK installation issues (insufficient storage, incompatible architecture)
+
+Testing approach: Create integration tests with sample APKs to verify installation, launching, and interaction functions. Use command mocking for unit tests to verify proper ADB command construction.
+
+## 4. Develop API Endpoints for Emulator Management [pending]
+### Dependencies: 4.1, 4.2, 4.3
+### Description: Create RESTful API endpoints that expose the emulator management functionality, allowing external systems to control and monitor emulators.
+### Details:
+1. Using a Rust web framework (e.g., Actix-web, Rocket), implement the following API endpoints:
+- `POST /emulators` - Create and start a new emulator instance
+  * Accept JSON payload with AVD configuration
+  * Return emulator ID and connection details
+- `GET /emulators` - List all running emulator instances
+- `GET /emulators/{id}` - Get details of a specific emulator
+- `DELETE /emulators/{id}` - Stop and remove an emulator
+- `POST /emulators/{id}/apps` - Install an application (multipart form for APK upload)
+- `GET /emulators/{id}/apps` - List installed applications
+- `POST /emulators/{id}/screenshot` - Capture and return a screenshot
+- `POST /emulators/{id}/input` - Send input commands (tap, text, key events)
+2. Implement proper request validation and error handling
+3. Add authentication middleware to secure API endpoints
+4. Implement request rate limiting to prevent system overload
+5. Create Swagger/OpenAPI documentation for the API
+6. Add WebSocket endpoint for real-time emulator status updates
+
+Testing approach: Write API tests using HTTP client libraries to verify endpoint functionality. Test both successful scenarios and error cases. Use mock implementations of the underlying emulator control modules for unit testing.
+
+## 5. Implement Persistence and Configuration Management [pending]
+### Dependencies: 4.1, 4.2, 4.3, 4.4
+### Description: Create a system to persist emulator configurations, track instance states, and manage AVD profiles in a SQLite database.
+### Details:
+1. Set up a SQLite database using Diesel ORM with the following schema:
+- `emulator_configs` table to store AVD configurations
+- `emulator_instances` table to track running instances
+- `installed_apps` table to record installed applications
+- `port_allocations` table to track port usage
+2. Implement data models and database operations:
+- Create, read, update, delete operations for emulator configurations
+- Functions to persist emulator state (running, stopped, error)
+- Methods to track resource usage and performance metrics
+3. Implement AVD template management:
+- Store predefined AVD configurations (device types, API levels)
+- Support cloning templates for quick instance creation
+- Allow customization of hardware properties (RAM, CPU cores, screen size)
+4. Add configuration validation to ensure valid AVD parameters
+5. Implement database migrations for schema updates
+6. Create backup and restore functionality for configurations
+7. Add periodic state synchronization to handle unexpected emulator terminations
+
+Testing approach: Use an in-memory SQLite database for testing. Write unit tests for all database operations. Test schema migrations and data integrity. Verify that the system can recover from crashes by comparing persisted state with actual running emulators.
+

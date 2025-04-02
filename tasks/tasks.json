@@ -58,7 +58,7 @@
       "id": 3,
       "title": "Containerize Application with Docker",
       "description": "Create Docker configuration for backend, frontend, and development environment.",
-      "status": "pending",
+      "status": "done",
       "dependencies": [
         1,
         2
@@ -73,7 +73,7 @@
           "description": "Implement a multi-stage Dockerfile for the Rust backend that optimizes container size while ensuring proper build and runtime environments.",
           "dependencies": [],
           "details": "Implementation steps:\n1. Create a Dockerfile in the backend directory\n2. Set up a multi-stage build with:\n   - First stage: Use rust:slim as build image\n   - Install build dependencies and compile the application\n   - Second stage: Use debian:slim-bookworm as runtime image\n   - Copy only the compiled binary and necessary runtime files\n3. Configure proper WORKDIR, USER (non-root), and ENTRYPOINT\n4. Add health check using HEALTHCHECK instruction that tests the application's /health endpoint\n5. Optimize the image by:\n   - Using .dockerignore to exclude unnecessary files\n   - Minimizing layers with combined RUN commands\n   - Setting appropriate environment variables\n\nTesting approach:\n1. Build the Docker image: `docker build -t backend:latest ./backend`\n2. Run the container: `docker run -p 8080:8080 backend:latest`\n3. Verify the application starts correctly\n4. Test the health check: `docker inspect --format='{{.State.Health.Status}}' <container_id>`\n5. Check image size: `docker images backend:latest`",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 3
         },
         {
@@ -82,7 +82,7 @@
           "description": "Implement a Dockerfile for the Remix frontend that handles both build and runtime environments efficiently.",
           "dependencies": [],
           "details": "Implementation steps:\n1. Create a Dockerfile in the frontend directory\n2. Set up a multi-stage build with:\n   - First stage: Use node:18-alpine as build image\n   - Install dependencies with npm/yarn and build the Remix application\n   - Second stage: Use node:18-alpine as runtime image\n   - Copy built assets and necessary runtime files\n3. Configure proper WORKDIR, USER (non-root), and CMD\n4. Add health check using HEALTHCHECK instruction that tests the application's base URL\n5. Optimize the image by:\n   - Using .dockerignore to exclude node_modules, .git, etc.\n   - Caching node_modules for faster builds\n   - Setting NODE_ENV=production for runtime\n\nTesting approach:\n1. Build the Docker image: `docker build -t frontend:latest ./frontend`\n2. Run the container: `docker run -p 3000:3000 frontend:latest`\n3. Verify the application starts and is accessible at http://localhost:3000\n4. Test the health check: `docker inspect --format='{{.State.Health.Status}}' <container_id>`\n5. Check image size: `docker images frontend:latest`",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 3
         },
         {
@@ -94,7 +94,39 @@
             2
           ],
           "details": "Implementation steps:\n1. Create a docker-compose.yml file in the project root\n2. Define services for:\n   - Backend service using the Dockerfile from subtask 1\n   - Frontend service using the Dockerfile from subtask 2\n   - Any additional services needed (database, cache, etc.)\n3. Configure networking:\n   - Create a custom network for inter-service communication\n   - Map appropriate ports to host machine\n   - Set service names for DNS resolution\n4. Set up volume mounts for development:\n   - Mount backend source code directory to enable hot-reloading\n   - Mount frontend source code directory for live development\n   - Use named volumes for persistent data (if applicable)\n5. Configure environment variables:\n   - Create a .env file for shared variables\n   - Set service-specific environment variables in the compose file\n   - Include development-specific settings\n6. Add depends_on directives to establish proper startup order\n7. Include healthcheck configurations to ensure services are ready\n\nTesting approach:\n1. Start the environment: `docker-compose up -d`\n2. Verify all services start correctly: `docker-compose ps`\n3. Test backend API access from frontend container\n4. Make a code change in both frontend and backend to verify hot-reloading\n5. Test environment variables are correctly passed to containers\n6. Validate network connectivity between services\n7. Shut down and restart to verify persistence: `docker-compose down && docker-compose up -d`",
-          "status": "pending",
+          "status": "done",
+          "parentTaskId": 3
+        },
+        {
+          "id": 4,
+          "title": "Create Dockerfiles for Backend and Frontend",
+          "description": "Create optimized Dockerfiles for both the Rust backend (using multi-stage builds) and the Remix frontend applications.",
+          "dependencies": [],
+          "details": "## Backend Dockerfile Implementation\n1. Create a `Dockerfile` in the backend directory with multi-stage build:\n   - Use `rust:slim` as the build image\n   - Install necessary build dependencies\n   - Copy source files and build with `cargo build --release`\n   - Use a minimal runtime image like `debian:slim`\n   - Copy only the compiled binary and necessary runtime files\n   - Set proper permissions and non-root user\n   - Configure health check with appropriate endpoint\n\n## Frontend Dockerfile Implementation\n1. Create a `Dockerfile` in the frontend directory:\n   - Use `node:lts-alpine` as the base image\n   - Copy package files and install dependencies\n   - Copy source code and build the application\n   - Set up the production runtime with minimal dependencies\n   - Configure appropriate entry point\n\n## Testing Approach\n- Verify each Dockerfile builds successfully\n- Check image sizes are optimized\n- Validate containers start properly\n- Test health check functionality for backend\n- Ensure proper permissions are set\n\nNote: Both Dockerfiles should follow best practices for security and optimization.",
+          "status": "done",
+          "parentTaskId": 3
+        },
+        {
+          "id": 5,
+          "title": "Configure Docker Compose for Local Development",
+          "description": "Create Docker Compose configuration for local development environment with proper networking, volume mounting, and environment variables.",
+          "dependencies": [
+            4
+          ],
+          "details": "## Implementation Steps\n1. Create a `docker-compose.yml` file in the project root with:\n   - Service definitions for backend and frontend\n   - Development-optimized configurations\n   - Volume mounts for hot-reloading:\n     - Mount backend source to `/app/src`\n     - Mount frontend source to `/app/src`\n   - Configure proper networking between services\n   - Set up named volumes for persistent data if needed\n\n2. Create a `.env` file template with all required environment variables:\n   - Database connection strings\n   - API endpoints and keys\n   - Development-specific settings\n\n3. Configure proper port mapping for local access:\n   - Map backend API port (e.g., 8080:8080)\n   - Map frontend port (e.g., 3000:3000)\n\n## OrbStack-specific Instructions\n1. Add comments in the docker-compose.yml for OrbStack users:\n   ```yaml\n   # For OrbStack users: This configuration works with OrbStack out of the box\n   # You can access services using the .orb domain, e.g., frontend.orb\n   ```\n2. Document how to start with OrbStack:\n   ```\n   # Start with OrbStack\n   open -a OrbStack\n   docker-compose up -d\n   ```\n\n## Testing Approach\n- Verify all services start correctly with `docker-compose up`\n- Test code hot-reloading by making changes to source files\n- Verify services can communicate with each other\n- Confirm environment variables are properly passed to containers",
+          "status": "done",
+          "parentTaskId": 3
+        },
+        {
+          "id": 6,
+          "title": "Optimize Docker Configuration and Add Health Checks",
+          "description": "Enhance Docker configuration with health checks, optimize container sizes, and prepare for both development and production environments.",
+          "dependencies": [
+            4,
+            5
+          ],
+          "details": "## Implementation Steps\n1. Add health checks to docker-compose.yml:\n   ```yaml\n   healthcheck:\n     test: [\"CMD\", \"curl\", \"-f\", \"http://localhost:8080/health\"]\n     interval: 30s\n     timeout: 10s\n     retries: 3\n     start_period: 40s\n   ```\n\n2. Create production-ready docker-compose file:\n   - Create `docker-compose.prod.yml` with production optimizations\n   - Remove development-specific volume mounts\n   - Configure for production environment variables\n   - Add resource constraints for containers\n   - Set restart policies to `unless-stopped`\n\n3. Optimize container configurations:\n   - Add `.dockerignore` files to exclude unnecessary files\n   - Configure proper caching for build layers\n   - Minimize number of layers in Dockerfiles\n   - Use multi-stage builds for both backend and frontend\n   - Remove development dependencies in production builds\n\n4. Document deployment process:\n   - Create a README.md section for Docker deployment\n   - Include instructions for both development and production\n   - Document environment variable requirements\n   - Add OrbStack-specific notes for local development only\n\n## Testing Approach\n- Verify health checks work by intentionally breaking services\n- Measure and compare container sizes before and after optimization\n- Test deployment using production configuration\n- Verify resource constraints are properly applied\n- Test container recovery with restart policies",
+          "status": "done",
           "parentTaskId": 3
         }
       ]
@@ -110,7 +142,67 @@
       ],
       "priority": "high",
       "details": "1. Create a Rust module for emulator management\n2. Implement functions to start/stop emulators using std::process::Command\n3. Create API endpoints to manage emulator instances\n4. Set up port mapping for multiple emulator instances\n5. Implement emulator status tracking\n6. Create functions to install apps on emulators\n7. Develop error handling for emulator operations\n8. Store emulator configurations in SQLite database",
-      "testStrategy": "Create integration tests with mock emulator processes. Test starting/stopping multiple emulator instances. Verify port assignments work correctly. Test error handling when emulators fail to start."
+      "testStrategy": "Create integration tests with mock emulator processes. Test starting/stopping multiple emulator instances. Verify port assignments work correctly. Test error handling when emulators fail to start.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Implement Core Emulator Control Module",
+          "description": "Create a foundational Rust module that provides low-level functions to spawn, monitor, and terminate Android emulators using ADB commands.",
+          "dependencies": [],
+          "details": "1. Create a new Rust module `emulator_control.rs` with the following components:\n- Implement a struct `EmulatorInstance` to track emulator metadata (AVD name, port, process ID, status)\n- Create functions to execute ADB and emulator commands using `std::process::Command`:\n  * `start_emulator(avd_name: &str, port: u16)` - Start an emulator with hardware acceleration flags (-gpu auto, using HAXM/KVM)\n  * `stop_emulator(port: u16)` - Gracefully terminate an emulator instance\n  * `check_emulator_status(port: u16)` - Verify if an emulator is running and responsive\n  * `list_running_emulators()` - Return a list of all active emulator instances\n  * `wait_for_emulator_boot(port: u16)` - Poll until emulator is fully booted\n2. Implement proper error handling using Rust's Result type with custom error enums\n3. Add logging for all emulator operations\n4. Write unit tests using command mocking to verify correct command execution\n5. Ensure the module handles edge cases like ADB server failures with automatic restarts\n\nTesting approach: Create mock implementations of `std::process::Command` to test the module without actually spawning emulators. Verify the correct commands are constructed and executed.",
+          "status": "pending",
+          "parentTaskId": 4
+        },
+        {
+          "id": 2,
+          "title": "Develop Port Management and Multi-Instance Handling",
+          "description": "Create a system to manage port allocation and handle multiple concurrent emulator instances without conflicts.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Create a `port_manager.rs` module with the following functionality:\n- Implement a `PortManager` struct that tracks and allocates available ports for emulators\n- Add functions to:\n  * `allocate_port()` - Find and reserve the next available port (starting from 5554, incrementing by 2)\n  * `release_port(port: u16)` - Mark a port as available when an emulator is stopped\n  * `get_console_port(adb_port: u16)` - Calculate the corresponding console port (ADB port + 1)\n  * `is_port_available(port: u16)` - Check if a port is already in use\n2. Implement the Singleton pattern for the PortManager to ensure consistent port allocation\n3. Add port validation to verify ports are in valid range (5554-5682) and not already in use\n4. Create a multi-instance coordinator that:\n  * Prevents AVD name conflicts by appending unique identifiers\n  * Manages resource allocation for multiple emulators\n  * Implements throttling to prevent system overload\n5. Implement thread-safe access to port resources using Rust's synchronization primitives (Mutex, Arc)\n\nTesting approach: Write unit tests that verify port allocation logic, concurrent access patterns, and proper cleanup. Test edge cases like exhausting all available ports.",
+          "status": "pending",
+          "parentTaskId": 4
+        },
+        {
+          "id": 3,
+          "title": "Implement Application Installation and Control Functions",
+          "description": "Develop functionality to install and manage applications on emulator instances, including APK installation and basic app interaction.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Create an `app_manager.rs` module with the following functions:\n- `install_apk(port: u16, apk_path: &str)` - Install an APK on a specific emulator\n- `uninstall_app(port: u16, package_name: &str)` - Remove an application\n- `start_app(port: u16, package_name: &str, activity: &str)` - Launch a specific app activity\n- `stop_app(port: u16, package_name: &str)` - Force stop an application\n- `check_if_installed(port: u16, package_name: &str)` - Verify if an app is installed\n- `get_installed_apps(port: u16)` - List all installed applications\n2. Implement input simulation functions:\n- `input_tap(port: u16, x: u32, y: u32)` - Simulate touch at coordinates\n- `input_text(port: u16, text: &str)` - Input text\n- `input_keyevent(port: u16, keycode: u32)` - Send key events\n3. Add file transfer capabilities:\n- `push_file(port: u16, local_path: &str, device_path: &str)` - Copy file to emulator\n- `pull_file(port: u16, device_path: &str, local_path: &str)` - Copy file from emulator\n4. Implement screenshot and screen recording functionality\n5. Add error handling for common APK installation issues (insufficient storage, incompatible architecture)\n\nTesting approach: Create integration tests with sample APKs to verify installation, launching, and interaction functions. Use command mocking for unit tests to verify proper ADB command construction.",
+          "status": "pending",
+          "parentTaskId": 4
+        },
+        {
+          "id": 4,
+          "title": "Develop API Endpoints for Emulator Management",
+          "description": "Create RESTful API endpoints that expose the emulator management functionality, allowing external systems to control and monitor emulators.",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "1. Using a Rust web framework (e.g., Actix-web, Rocket), implement the following API endpoints:\n- `POST /emulators` - Create and start a new emulator instance\n  * Accept JSON payload with AVD configuration\n  * Return emulator ID and connection details\n- `GET /emulators` - List all running emulator instances\n- `GET /emulators/{id}` - Get details of a specific emulator\n- `DELETE /emulators/{id}` - Stop and remove an emulator\n- `POST /emulators/{id}/apps` - Install an application (multipart form for APK upload)\n- `GET /emulators/{id}/apps` - List installed applications\n- `POST /emulators/{id}/screenshot` - Capture and return a screenshot\n- `POST /emulators/{id}/input` - Send input commands (tap, text, key events)\n2. Implement proper request validation and error handling\n3. Add authentication middleware to secure API endpoints\n4. Implement request rate limiting to prevent system overload\n5. Create Swagger/OpenAPI documentation for the API\n6. Add WebSocket endpoint for real-time emulator status updates\n\nTesting approach: Write API tests using HTTP client libraries to verify endpoint functionality. Test both successful scenarios and error cases. Use mock implementations of the underlying emulator control modules for unit testing.",
+          "status": "pending",
+          "parentTaskId": 4
+        },
+        {
+          "id": 5,
+          "title": "Implement Persistence and Configuration Management",
+          "description": "Create a system to persist emulator configurations, track instance states, and manage AVD profiles in a SQLite database.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "1. Set up a SQLite database using Diesel ORM with the following schema:\n- `emulator_configs` table to store AVD configurations\n- `emulator_instances` table to track running instances\n- `installed_apps` table to record installed applications\n- `port_allocations` table to track port usage\n2. Implement data models and database operations:\n- Create, read, update, delete operations for emulator configurations\n- Functions to persist emulator state (running, stopped, error)\n- Methods to track resource usage and performance metrics\n3. Implement AVD template management:\n- Store predefined AVD configurations (device types, API levels)\n- Support cloning templates for quick instance creation\n- Allow customization of hardware properties (RAM, CPU cores, screen size)\n4. Add configuration validation to ensure valid AVD parameters\n5. Implement database migrations for schema updates\n6. Create backup and restore functionality for configurations\n7. Add periodic state synchronization to handle unexpected emulator terminations\n\nTesting approach: Use an in-memory SQLite database for testing. Write unit tests for all database operations. Test schema migrations and data integrity. Verify that the system can recover from crashes by comparing persisted state with actual running emulators.",
+          "status": "pending",
+          "parentTaskId": 4
+        }
+      ]
     },
     {
       "id": 5,

@@ -3,11 +3,7 @@ use anyhow::Result;
 use dotenv::dotenv;
 use log::info;
 
-mod config;
-mod routes;
-mod handlers;
-mod models;
-mod db;
+use backend::{config, db, routes};
 
 #[actix_web::main]
 async fn main() -> Result<()> {

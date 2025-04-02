@@ -1,6 +1,6 @@
 # Task ID: 3
 # Title: Containerize Application with Docker
-# Status: pending
+# Status: done
 # Dependencies: 1, 2
 # Priority: high
 # Description: Create Docker configuration for backend, frontend, and development environment.
@@ -18,7 +18,7 @@
 Verify containers start successfully with docker-compose up. Test communication between services. Ensure volumes are properly mounted for development. Verify hot-reloading works in development mode.
 
 # Subtasks:
-## 1. Create Docker configuration for the Rust backend [pending]
+## 1. Create Docker configuration for the Rust backend [done]
 ### Dependencies: None
 ### Description: Implement a multi-stage Dockerfile for the Rust backend that optimizes container size while ensuring proper build and runtime environments.
 ### Details:
@@ -43,7 +43,7 @@ Testing approach:
 4. Test the health check: `docker inspect --format='{{.State.Health.Status}}' <container_id>`
 5. Check image size: `docker images backend:latest`
 
-## 2. Create Docker configuration for the Remix frontend [pending]
+## 2. Create Docker configuration for the Remix frontend [done]
 ### Dependencies: None
 ### Description: Implement a Dockerfile for the Remix frontend that handles both build and runtime environments efficiently.
 ### Details:
@@ -68,7 +68,7 @@ Testing approach:
 4. Test the health check: `docker inspect --format='{{.State.Health.Status}}' <container_id>`
 5. Check image size: `docker images frontend:latest`
 
-## 3. Set up Docker Compose for local development environment [pending]
+## 3. Set up Docker Compose for local development environment [done]
 ### Dependencies: 3.1, 3.2
 ### Description: Create a Docker Compose configuration that orchestrates the backend and frontend containers with proper networking, volume mounting, and environment variables for development.
 ### Details:
@@ -101,4 +101,119 @@ Testing approach:
 5. Test environment variables are correctly passed to containers
 6. Validate network connectivity between services
 7. Shut down and restart to verify persistence: `docker-compose down && docker-compose up -d`
+
+## 4. Create Dockerfiles for Backend and Frontend [done]
+### Dependencies: None
+### Description: Create optimized Dockerfiles for both the Rust backend (using multi-stage builds) and the Remix frontend applications.
+### Details:
+## Backend Dockerfile Implementation
+1. Create a `Dockerfile` in the backend directory with multi-stage build:
+   - Use `rust:slim` as the build image
+   - Install necessary build dependencies
+   - Copy source files and build with `cargo build --release`
+   - Use a minimal runtime image like `debian:slim`
+   - Copy only the compiled binary and necessary runtime files
+   - Set proper permissions and non-root user
+   - Configure health check with appropriate endpoint
+
+## Frontend Dockerfile Implementation
+1. Create a `Dockerfile` in the frontend directory:
+   - Use `node:lts-alpine` as the base image
+   - Copy package files and install dependencies
+   - Copy source code and build the application
+   - Set up the production runtime with minimal dependencies
+   - Configure appropriate entry point
+
+## Testing Approach
+- Verify each Dockerfile builds successfully
+- Check image sizes are optimized
+- Validate containers start properly
+- Test health check functionality for backend
+- Ensure proper permissions are set
+
+Note: Both Dockerfiles should follow best practices for security and optimization.
+
+## 5. Configure Docker Compose for Local Development [done]
+### Dependencies: 3.4
+### Description: Create Docker Compose configuration for local development environment with proper networking, volume mounting, and environment variables.
+### Details:
+## Implementation Steps
+1. Create a `docker-compose.yml` file in the project root with:
+   - Service definitions for backend and frontend
+   - Development-optimized configurations
+   - Volume mounts for hot-reloading:
+     - Mount backend source to `/app/src`
+     - Mount frontend source to `/app/src`
+   - Configure proper networking between services
+   - Set up named volumes for persistent data if needed
+
+2. Create a `.env` file template with all required environment variables:
+   - Database connection strings
+   - API endpoints and keys
+   - Development-specific settings
+
+3. Configure proper port mapping for local access:
+   - Map backend API port (e.g., 8080:8080)
+   - Map frontend port (e.g., 3000:3000)
+
+## OrbStack-specific Instructions
+1. Add comments in the docker-compose.yml for OrbStack users:
+   ```yaml
+   # For OrbStack users: This configuration works with OrbStack out of the box
+   # You can access services using the .orb domain, e.g., frontend.orb
+   ```
+2. Document how to start with OrbStack:
+   ```
+   # Start with OrbStack
+   open -a OrbStack
+   docker-compose up -d
+   ```
+
+## Testing Approach
+- Verify all services start correctly with `docker-compose up`
+- Test code hot-reloading by making changes to source files
+- Verify services can communicate with each other
+- Confirm environment variables are properly passed to containers
+
+## 6. Optimize Docker Configuration and Add Health Checks [done]
+### Dependencies: 3.4, 3.5
+### Description: Enhance Docker configuration with health checks, optimize container sizes, and prepare for both development and production environments.
+### Details:
+## Implementation Steps
+1. Add health checks to docker-compose.yml:
+   ```yaml
+   healthcheck:
+     test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+     interval: 30s
+     timeout: 10s
+     retries: 3
+     start_period: 40s
+   ```
+
+2. Create production-ready docker-compose file:
+   - Create `docker-compose.prod.yml` with production optimizations
+   - Remove development-specific volume mounts
+   - Configure for production environment variables
+   - Add resource constraints for containers
+   - Set restart policies to `unless-stopped`
+
+3. Optimize container configurations:
+   - Add `.dockerignore` files to exclude unnecessary files
+   - Configure proper caching for build layers
+   - Minimize number of layers in Dockerfiles
+   - Use multi-stage builds for both backend and frontend
+   - Remove development dependencies in production builds
+
+4. Document deployment process:
+   - Create a README.md section for Docker deployment
+   - Include instructions for both development and production
+   - Document environment variable requirements
+   - Add OrbStack-specific notes for local development only
+
+## Testing Approach
+- Verify health checks work by intentionally breaking services
+- Measure and compare container sizes before and after optimization
+- Test deployment using production configuration
+- Verify resource constraints are properly applied
+- Test container recovery with restart policies
 
