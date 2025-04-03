@@ -6,6 +6,9 @@ node_modules
 dist
 build
 out
+# Rust build output
+target
+target/*
 
 # Environment
 .env

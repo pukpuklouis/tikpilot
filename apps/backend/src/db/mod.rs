@@ -3,6 +3,9 @@ use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
 use std::path::Path;
 use std::fs;
 
+pub mod emulator;
+pub use emulator::EmulatorDb;
+
 pub async fn create_pool(database_url: &str) -> Result<SqlitePool> {
     // Extract the path from the SQLite URL
     let path = database_url.strip_prefix("sqlite:").unwrap_or(database_url);
@@ -21,18 +24,8 @@ pub async fn create_pool(database_url: &str) -> Result<SqlitePool> {
         .await?;
     
     // Initialize the database schema if needed
-    sqlx::query(
-        r#"
-        CREATE TABLE IF NOT EXISTS accounts (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
-        )
-        "#
-    )
-    .execute(&pool)
-    .await?;
+    let emulator_db = EmulatorDb::new(pool.clone());
+    emulator_db.init().await?;
     
     Ok(pool)
 }

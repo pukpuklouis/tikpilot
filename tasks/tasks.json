@@ -135,7 +135,7 @@
       "id": 4,
       "title": "Implement Emulator Management System",
       "description": "Develop functionality to spawn, manage, and control Android emulators via ADB.",
-      "status": "pending",
+      "status": "done",
       "dependencies": [
         1,
         3
@@ -150,7 +150,7 @@
           "description": "Create a foundational Rust module that provides low-level functions to spawn, monitor, and terminate Android emulators using ADB commands.",
           "dependencies": [],
           "details": "1. Create a new Rust module `emulator_control.rs` with the following components:\n- Implement a struct `EmulatorInstance` to track emulator metadata (AVD name, port, process ID, status)\n- Create functions to execute ADB and emulator commands using `std::process::Command`:\n  * `start_emulator(avd_name: &str, port: u16)` - Start an emulator with hardware acceleration flags (-gpu auto, using HAXM/KVM)\n  * `stop_emulator(port: u16)` - Gracefully terminate an emulator instance\n  * `check_emulator_status(port: u16)` - Verify if an emulator is running and responsive\n  * `list_running_emulators()` - Return a list of all active emulator instances\n  * `wait_for_emulator_boot(port: u16)` - Poll until emulator is fully booted\n2. Implement proper error handling using Rust's Result type with custom error enums\n3. Add logging for all emulator operations\n4. Write unit tests using command mocking to verify correct command execution\n5. Ensure the module handles edge cases like ADB server failures with automatic restarts\n\nTesting approach: Create mock implementations of `std::process::Command` to test the module without actually spawning emulators. Verify the correct commands are constructed and executed.",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 4
         },
         {
@@ -161,7 +161,7 @@
             1
           ],
           "details": "1. Create a `port_manager.rs` module with the following functionality:\n- Implement a `PortManager` struct that tracks and allocates available ports for emulators\n- Add functions to:\n  * `allocate_port()` - Find and reserve the next available port (starting from 5554, incrementing by 2)\n  * `release_port(port: u16)` - Mark a port as available when an emulator is stopped\n  * `get_console_port(adb_port: u16)` - Calculate the corresponding console port (ADB port + 1)\n  * `is_port_available(port: u16)` - Check if a port is already in use\n2. Implement the Singleton pattern for the PortManager to ensure consistent port allocation\n3. Add port validation to verify ports are in valid range (5554-5682) and not already in use\n4. Create a multi-instance coordinator that:\n  * Prevents AVD name conflicts by appending unique identifiers\n  * Manages resource allocation for multiple emulators\n  * Implements throttling to prevent system overload\n5. Implement thread-safe access to port resources using Rust's synchronization primitives (Mutex, Arc)\n\nTesting approach: Write unit tests that verify port allocation logic, concurrent access patterns, and proper cleanup. Test edge cases like exhausting all available ports.",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 4
         },
         {
@@ -172,7 +172,7 @@
             1
           ],
           "details": "1. Create an `app_manager.rs` module with the following functions:\n- `install_apk(port: u16, apk_path: &str)` - Install an APK on a specific emulator\n- `uninstall_app(port: u16, package_name: &str)` - Remove an application\n- `start_app(port: u16, package_name: &str, activity: &str)` - Launch a specific app activity\n- `stop_app(port: u16, package_name: &str)` - Force stop an application\n- `check_if_installed(port: u16, package_name: &str)` - Verify if an app is installed\n- `get_installed_apps(port: u16)` - List all installed applications\n2. Implement input simulation functions:\n- `input_tap(port: u16, x: u32, y: u32)` - Simulate touch at coordinates\n- `input_text(port: u16, text: &str)` - Input text\n- `input_keyevent(port: u16, keycode: u32)` - Send key events\n3. Add file transfer capabilities:\n- `push_file(port: u16, local_path: &str, device_path: &str)` - Copy file to emulator\n- `pull_file(port: u16, device_path: &str, local_path: &str)` - Copy file from emulator\n4. Implement screenshot and screen recording functionality\n5. Add error handling for common APK installation issues (insufficient storage, incompatible architecture)\n\nTesting approach: Create integration tests with sample APKs to verify installation, launching, and interaction functions. Use command mocking for unit tests to verify proper ADB command construction.",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 4
         },
         {
@@ -185,7 +185,7 @@
             3
           ],
           "details": "1. Using a Rust web framework (e.g., Actix-web, Rocket), implement the following API endpoints:\n- `POST /emulators` - Create and start a new emulator instance\n  * Accept JSON payload with AVD configuration\n  * Return emulator ID and connection details\n- `GET /emulators` - List all running emulator instances\n- `GET /emulators/{id}` - Get details of a specific emulator\n- `DELETE /emulators/{id}` - Stop and remove an emulator\n- `POST /emulators/{id}/apps` - Install an application (multipart form for APK upload)\n- `GET /emulators/{id}/apps` - List installed applications\n- `POST /emulators/{id}/screenshot` - Capture and return a screenshot\n- `POST /emulators/{id}/input` - Send input commands (tap, text, key events)\n2. Implement proper request validation and error handling\n3. Add authentication middleware to secure API endpoints\n4. Implement request rate limiting to prevent system overload\n5. Create Swagger/OpenAPI documentation for the API\n6. Add WebSocket endpoint for real-time emulator status updates\n\nTesting approach: Write API tests using HTTP client libraries to verify endpoint functionality. Test both successful scenarios and error cases. Use mock implementations of the underlying emulator control modules for unit testing.",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 4
         },
         {
@@ -199,7 +199,64 @@
             4
           ],
           "details": "1. Set up a SQLite database using Diesel ORM with the following schema:\n- `emulator_configs` table to store AVD configurations\n- `emulator_instances` table to track running instances\n- `installed_apps` table to record installed applications\n- `port_allocations` table to track port usage\n2. Implement data models and database operations:\n- Create, read, update, delete operations for emulator configurations\n- Functions to persist emulator state (running, stopped, error)\n- Methods to track resource usage and performance metrics\n3. Implement AVD template management:\n- Store predefined AVD configurations (device types, API levels)\n- Support cloning templates for quick instance creation\n- Allow customization of hardware properties (RAM, CPU cores, screen size)\n4. Add configuration validation to ensure valid AVD parameters\n5. Implement database migrations for schema updates\n6. Create backup and restore functionality for configurations\n7. Add periodic state synchronization to handle unexpected emulator terminations\n\nTesting approach: Use an in-memory SQLite database for testing. Write unit tests for all database operations. Test schema migrations and data integrity. Verify that the system can recover from crashes by comparing persisted state with actual running emulators.",
-          "status": "pending",
+          "status": "done",
+          "parentTaskId": 4
+        },
+        {
+          "id": 6,
+          "title": "Implement Core Emulator Control Module",
+          "description": "Create a Rust module with essential functions to start, stop, and monitor Android emulators using ADB commands via std::process::Command. Implement hardware acceleration detection and proper error handling.",
+          "dependencies": [],
+          "details": "1. Create a new module `emulator_control.rs` with a struct `EmulatorController`\n2. Implement functions for basic operations:\n   - `start_emulator(avd_name: &str, options: EmulatorOptions)` - Use commands like `emulator -avd <avd_name> -no-boot-anim -gpu host`\n   - `stop_emulator(emulator_id: &str)` - Execute `adb -s <emulator_id> emu kill`\n   - `list_running_emulators()` - Parse output from `adb devices`\n   - `wait_for_emulator_boot(emulator_id: &str)` - Poll `adb -s <emulator_id> shell getprop sys.boot_completed`\n3. Create an `EmulatorOptions` struct to configure hardware acceleration, display settings, and network options\n4. Implement error handling with custom error types for different failure scenarios (device not found, ADB server issues, etc.)\n5. Add a function to check and restart the ADB server if needed\n6. Test each function individually with unit tests using command mocking",
+          "status": "done",
+          "parentTaskId": 4
+        },
+        {
+          "id": 7,
+          "title": "Develop Port Management for Multiple Emulator Instances",
+          "description": "Implement a port allocation system to manage multiple concurrent emulator instances, handling port conflicts and tracking which ports are in use by which emulators.",
+          "dependencies": [
+            6
+          ],
+          "details": "1. Create a `port_manager.rs` module with a `PortManager` struct\n2. Implement functions:\n   - `allocate_ports()` - Reserve a set of ports (typically 5554-5555 for console/ADB) for a new emulator\n   - `release_ports(emulator_id: &str)` - Free ports when an emulator is stopped\n   - `get_emulator_ports(emulator_id: &str)` - Retrieve port information for a specific emulator\n3. Create a port tracking system that maps emulator IDs to their allocated ports\n4. Implement port conflict detection to prevent multiple emulators from using the same ports\n5. Add functions to parse emulator ID from port number and vice versa (e.g., 'emulator-5554' corresponds to console port 5554)\n6. Integrate with the EmulatorController from subtask #6 to automatically assign ports when starting emulators\n7. Test with multiple concurrent emulator instances to verify port isolation",
+          "status": "done",
+          "parentTaskId": 4
+        },
+        {
+          "id": 8,
+          "title": "Implement Application Installation and Management",
+          "description": "Create functionality to install, uninstall, and manage applications on emulators, including APK validation and installation status tracking.",
+          "dependencies": [
+            6
+          ],
+          "details": "1. Create an `app_manager.rs` module with an `AppManager` struct\n2. Implement key functions:\n   - `install_app(emulator_id: &str, apk_path: &str)` - Use `adb -s <emulator_id> install <apk_path>`\n   - `uninstall_app(emulator_id: &str, package_name: &str)` - Execute `adb -s <emulator_id> uninstall <package_name>`\n   - `list_installed_apps(emulator_id: &str)` - Parse output from `adb -s <emulator_id> shell pm list packages`\n   - `get_app_info(emulator_id: &str, package_name: &str)` - Retrieve detailed app information\n3. Add APK validation to check if the file exists and is a valid APK before installation\n4. Implement installation status tracking with proper error handling for installation failures\n5. Create a function to launch apps on the emulator using `adb shell am start`\n6. Add support for installing apps with specific flags (e.g., `-r` for reinstall, `-t` for test APKs)\n7. Test with various APK files to ensure reliable installation across different Android versions",
+          "status": "done",
+          "parentTaskId": 4
+        },
+        {
+          "id": 9,
+          "title": "Develop Persistence and Configuration Management",
+          "description": "Implement a SQLite-based persistence layer to store and manage emulator configurations, status information, and historical data.",
+          "dependencies": [
+            6,
+            7
+          ],
+          "details": "1. Create a `db_manager.rs` module using rusqlite or diesel for SQLite interactions\n2. Design and implement database schema with tables for:\n   - `emulator_configs` - Store AVD configurations and settings\n   - `emulator_instances` - Track running emulator instances and their status\n   - `port_allocations` - Record port assignments for each emulator\n   - `installation_history` - Log app installation attempts and results\n3. Implement CRUD operations for each entity type\n4. Create functions to save and load emulator configurations:\n   - `save_emulator_config(config: EmulatorConfig)` \n   - `get_emulator_config(config_id: i64)`\n   - `list_emulator_configs()`\n   - `update_emulator_status(emulator_id: &str, status: EmulatorStatus)`\n5. Add migration support for schema updates\n6. Implement configuration validation before saving\n7. Add indexes for performance optimization\n8. Test persistence with various configurations and recovery scenarios",
+          "status": "done",
+          "parentTaskId": 4
+        },
+        {
+          "id": 10,
+          "title": "Create REST API Endpoints for Emulator Management",
+          "description": "Develop a comprehensive REST API to expose emulator management functionality, allowing external systems to control and monitor emulators.",
+          "dependencies": [
+            6,
+            7,
+            8,
+            9
+          ],
+          "details": "1. Create an `api.rs` module that integrates with a web framework (e.g., actix-web, rocket)\n2. Implement the following REST endpoints:\n   - `POST /emulators` - Create and start a new emulator with specified configuration\n   - `GET /emulators` - List all running emulators and their status\n   - `GET /emulators/{id}` - Get detailed information about a specific emulator\n   - `DELETE /emulators/{id}` - Stop and remove an emulator\n   - `POST /emulators/{id}/apps` - Install an app on a specific emulator\n   - `GET /emulators/{id}/apps` - List installed apps on an emulator\n   - `DELETE /emulators/{id}/apps/{package_name}` - Uninstall an app\n   - `GET /configs` - List saved emulator configurations\n   - `POST /configs` - Create a new emulator configuration\n3. Implement proper request validation and error handling\n4. Add authentication and authorization mechanisms\n5. Create response models with appropriate status codes\n6. Implement request rate limiting to prevent system overload\n7. Add API documentation using OpenAPI/Swagger\n8. Test API endpoints with integration tests covering various scenarios",
+          "status": "done",
           "parentTaskId": 4
         }
       ]
@@ -208,13 +265,60 @@
       "id": 5,
       "title": "Create Playwright Microservice",
       "description": "Develop a Node.js microservice using Playwright for browser automation and control.",
-      "status": "pending",
+      "status": "in-progress",
       "dependencies": [
         3
       ],
       "priority": "medium",
       "details": "1. Set up a Node.js Express project for the Playwright service\n2. Install and configure Playwright with Chromium support\n3. Create API endpoints for common actions (scroll, like, comment)\n4. Implement connection to emulator WebViews\n5. Add browser fingerprinting randomization\n6. Create Docker configuration for the service\n7. Implement error handling and logging\n8. Add health check endpoint",
-      "testStrategy": "Create unit tests for Playwright actions. Test connecting to mock WebView endpoints. Verify scrolling, clicking, and other interactions work correctly. Test error scenarios like connection failures."
+      "testStrategy": "Create unit tests for Playwright actions. Test connecting to mock WebView endpoints. Verify scrolling, clicking, and other interactions work correctly. Test error scenarios like connection failures.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Set up Node.js/Express service with Playwright integration",
+          "description": "Initialize a Node.js project with Express framework and integrate Playwright with Chromium support",
+          "dependencies": [],
+          "details": "1. Initialize a new Node.js project with `npm init`\n2. Install Express.js: `npm install express cors body-parser`\n3. Install Playwright: `npm install playwright`\n4. Configure Playwright with Chromium browser support\n5. Create basic server structure with app.js and server.js files\n6. Set up basic middleware (CORS, body-parser, etc.)\n7. Implement a simple root endpoint to verify service is running\n8. Create a Playwright browser instance management utility\n9. Testing approach: Create unit tests to verify server initialization and Playwright browser launch",
+          "status": "done",
+          "parentTaskId": 5
+        },
+        {
+          "id": 2,
+          "title": "Implement core browser automation API endpoints",
+          "description": "Create REST API endpoints for common browser automation actions like navigation, scrolling, clicking, and form interactions",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Design RESTful API structure for browser actions\n2. Implement navigation endpoint (`/navigate`) to load URLs\n3. Create interaction endpoints for:\n   - Scrolling (`/scroll`)\n   - Clicking (`/click`)\n   - Form input (`/input`)\n   - Like/reaction actions (`/like`)\n   - Comment submission (`/comment`)\n4. Add request validation middleware\n5. Implement session management to handle multiple browser instances\n6. Create controller functions that use Playwright API to execute requested actions\n7. Add proper error handling for each endpoint\n8. Testing approach: Write integration tests for each endpoint using supertest, verifying Playwright actions are correctly executed",
+          "status": "in-progress",
+          "parentTaskId": 5
+        },
+        {
+          "id": 3,
+          "title": "Add WebView connection and browser fingerprinting",
+          "description": "Implement functionality to connect to emulator WebViews and add browser fingerprinting randomization",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. Research and implement WebView connection methods for common emulators\n2. Create a WebView connection utility that detects and connects to available WebViews\n3. Add an API endpoint to list available WebViews\n4. Implement an endpoint to connect to a specific WebView\n5. Research browser fingerprinting techniques\n6. Create a fingerprint randomization utility that can modify:\n   - User-Agent strings\n   - Canvas fingerprints\n   - WebRTC fingerprints\n   - Font fingerprints\n7. Add configuration options for fingerprint randomization levels\n8. Implement an endpoint to set fingerprinting options\n9. Testing approach: Create tests that verify WebView connections and validate fingerprint randomization is working",
+          "status": "pending",
+          "parentTaskId": 5
+        },
+        {
+          "id": 4,
+          "title": "Implement service containerization and monitoring",
+          "description": "Create Docker configuration, implement logging, error handling, and health monitoring endpoints",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "1. Create a Dockerfile optimized for Playwright with necessary dependencies\n2. Configure Docker environment variables for service configuration\n3. Implement structured logging using a library like Winston or Pino\n4. Add request/response logging middleware\n5. Implement comprehensive error handling across the service\n6. Create a `/health` endpoint that checks:\n   - Server status\n   - Playwright browser availability\n   - Memory usage\n   - Connection capabilities\n7. Add a `/metrics` endpoint for monitoring service performance\n8. Create docker-compose.yml for local development\n9. Document deployment instructions\n10. Testing approach: Verify Docker build process, test health endpoints, and validate logging works correctly in containerized environment",
+          "status": "pending",
+          "parentTaskId": 5
+        }
+      ]
     },
     {
       "id": 6,

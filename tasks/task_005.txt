@@ -1,6 +1,6 @@
 # Task ID: 5
 # Title: Create Playwright Microservice
-# Status: pending
+# Status: in-progress
 # Dependencies: 3
 # Priority: medium
 # Description: Develop a Node.js microservice using Playwright for browser automation and control.
@@ -16,3 +16,74 @@
 
 # Test Strategy:
 Create unit tests for Playwright actions. Test connecting to mock WebView endpoints. Verify scrolling, clicking, and other interactions work correctly. Test error scenarios like connection failures.
+
+# Subtasks:
+## 1. Set up Node.js/Express service with Playwright integration [done]
+### Dependencies: None
+### Description: Initialize a Node.js project with Express framework and integrate Playwright with Chromium support
+### Details:
+1. Initialize a new Node.js project with `npm init`
+2. Install Express.js: `npm install express cors body-parser`
+3. Install Playwright: `npm install playwright`
+4. Configure Playwright with Chromium browser support
+5. Create basic server structure with app.js and server.js files
+6. Set up basic middleware (CORS, body-parser, etc.)
+7. Implement a simple root endpoint to verify service is running
+8. Create a Playwright browser instance management utility
+9. Testing approach: Create unit tests to verify server initialization and Playwright browser launch
+
+## 2. Implement core browser automation API endpoints [in-progress]
+### Dependencies: 5.1
+### Description: Create REST API endpoints for common browser automation actions like navigation, scrolling, clicking, and form interactions
+### Details:
+1. Design RESTful API structure for browser actions
+2. Implement navigation endpoint (`/navigate`) to load URLs
+3. Create interaction endpoints for:
+   - Scrolling (`/scroll`)
+   - Clicking (`/click`)
+   - Form input (`/input`)
+   - Like/reaction actions (`/like`)
+   - Comment submission (`/comment`)
+4. Add request validation middleware
+5. Implement session management to handle multiple browser instances
+6. Create controller functions that use Playwright API to execute requested actions
+7. Add proper error handling for each endpoint
+8. Testing approach: Write integration tests for each endpoint using supertest, verifying Playwright actions are correctly executed
+
+## 3. Add WebView connection and browser fingerprinting [pending]
+### Dependencies: 5.1, 5.2
+### Description: Implement functionality to connect to emulator WebViews and add browser fingerprinting randomization
+### Details:
+1. Research and implement WebView connection methods for common emulators
+2. Create a WebView connection utility that detects and connects to available WebViews
+3. Add an API endpoint to list available WebViews
+4. Implement an endpoint to connect to a specific WebView
+5. Research browser fingerprinting techniques
+6. Create a fingerprint randomization utility that can modify:
+   - User-Agent strings
+   - Canvas fingerprints
+   - WebRTC fingerprints
+   - Font fingerprints
+7. Add configuration options for fingerprint randomization levels
+8. Implement an endpoint to set fingerprinting options
+9. Testing approach: Create tests that verify WebView connections and validate fingerprint randomization is working
+
+## 4. Implement service containerization and monitoring [pending]
+### Dependencies: 5.1, 5.2, 5.3
+### Description: Create Docker configuration, implement logging, error handling, and health monitoring endpoints
+### Details:
+1. Create a Dockerfile optimized for Playwright with necessary dependencies
+2. Configure Docker environment variables for service configuration
+3. Implement structured logging using a library like Winston or Pino
+4. Add request/response logging middleware
+5. Implement comprehensive error handling across the service
+6. Create a `/health` endpoint that checks:
+   - Server status
+   - Playwright browser availability
+   - Memory usage
+   - Connection capabilities
+7. Add a `/metrics` endpoint for monitoring service performance
+8. Create docker-compose.yml for local development
+9. Document deployment instructions
+10. Testing approach: Verify Docker build process, test health endpoints, and validate logging works correctly in containerized environment
+

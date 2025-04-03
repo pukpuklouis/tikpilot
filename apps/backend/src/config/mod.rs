@@ -1,40 +1,27 @@
-use config::{Config, ConfigError, Environment, File};
+use anyhow::Result;
 use serde::Deserialize;
 use std::env;
 
-#[derive(Debug, Deserialize, Clone)]
-pub struct Settings {
-    pub server: ServerSettings,
-    pub database: DatabaseSettings,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct ServerSettings {
+#[derive(Debug, Clone, Deserialize)]
+pub struct Config {
     pub host: String,
     pub port: u16,
+    pub database_url: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
-pub struct DatabaseSettings {
-    pub url: String,
-}
+impl Config {
+    pub async fn load() -> Result<Self> {
+        // Load from environment variables
+        dotenv::dotenv().ok();
 
-impl Settings {
-    pub fn new() -> Result<Self, ConfigError> {
-        let run_mode = env::var("RUN_MODE").unwrap_or_else(|_| "development".into());
-        let config_path = format!("config/{}", run_mode);
-
-        let settings = Config::builder()
-            // Start with default settings
-            .add_source(File::with_name("config/default").required(false))
-            // Add environment-specific settings
-            .add_source(File::with_name(&config_path).required(false))
-            // Add local settings (not version controlled)
-            .add_source(File::with_name("config/local").required(false))
-            // Add environment variables with prefix "APP_"
-            .add_source(Environment::with_prefix("APP").separator("__"))
-            .build()?;
-
-        settings.try_deserialize()
+        Ok(Config {
+            host: env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string()),
+            port: env::var("PORT")
+                .unwrap_or_else(|_| "8080".to_string())
+                .parse()
+                .unwrap_or(8080),
+            database_url: env::var("DATABASE_URL")
+                .unwrap_or_else(|_| "sqlite:data/emulators.db".to_string()),
+        })
     }
 }
