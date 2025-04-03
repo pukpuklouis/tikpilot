@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'playwright-service'
+    static_configs:
+      - targets: ['playwright-service:3001']
+    metrics_path: '/metrics'

@@ -3,8 +3,10 @@ import asyncHandler from 'express-async-handler';
 import { z } from 'zod';
 import { BrowserManager } from '../services/browser-manager.js';
 import { validateRequest } from '../middleware/validate-request.js';
+import { BadRequestError } from '../utils/errors.js';
+import logger from '../utils/logger.js';
 
-const router = Router();
+export const router = Router();
 
 // Validation schemas
 const navigationSchema = z.object({
@@ -37,9 +39,19 @@ router.post(
   validateRequest({ body: navigationSchema }),
   asyncHandler(async (req, res) => {
     const { url, waitUntil } = req.body;
+    logger.info(`Navigating to ${url}`);
+    
     const page = await BrowserManager.getInstance().getPage();
-    await page.goto(url, { waitUntil });
-    res.json({ success: true, url });
+    
+    try {
+      await page.goto(url, { waitUntil });
+      logger.info(`Successfully navigated to ${url}`);
+      res.json({ success: true, url });
+    } catch (err: unknown) {
+      const error = err as Error;
+      logger.error(`Failed to navigate to ${url}:`, error);
+      throw new BadRequestError(`Failed to navigate to ${url}: ${error.message}`);
+    }
   })
 );
 
@@ -48,31 +60,38 @@ router.post(
   validateRequest({ body: scrollSchema }),
   asyncHandler(async (req, res) => {
     const { selector, distance, direction, behavior } = req.body;
+    logger.info(`Scrolling ${direction} ${distance || 'viewport height'}${selector ? ` on element ${selector}` : ''}`);
+    
     const page = await BrowserManager.getInstance().getPage();
     
-    if (selector) {
-      await page.evaluate(
-        ({ selector, behavior }) => {
-          const element = document.querySelector(selector);
-          if (element) {
+    try {
+      if (selector) {
+        await page.evaluate(
+          ({ selector, behavior }) => {
+            const element = document.querySelector(selector);
+            if (!element) throw new Error(`Element not found: ${selector}`);
             element.scrollIntoView({ behavior });
-          }
-        },
-        { selector, behavior }
-      );
-    } else {
-      await page.evaluate(
-        ({ distance, direction, behavior }) => {
-          window.scrollBy({
-            top: direction === 'down' ? distance || window.innerHeight : -(distance || window.innerHeight),
-            behavior,
-          });
-        },
-        { distance, direction, behavior }
-      );
+          },
+          { selector, behavior }
+        );
+      } else {
+        await page.evaluate(
+          ({ distance, direction, behavior }) => {
+            window.scrollBy({
+              top: direction === 'down' ? distance || window.innerHeight : -(distance || window.innerHeight),
+              behavior,
+            });
+          },
+          { distance, direction, behavior }
+        );
+      }
+      logger.info('Scroll completed successfully');
+      res.json({ success: true });
+    } catch (err: unknown) {
+      const error = err as Error;
+      logger.error('Failed to scroll:', error);
+      throw new BadRequestError(`Failed to scroll: ${error.message}`);
     }
-    
-    res.json({ success: true });
   })
 );
 
@@ -81,9 +100,19 @@ router.post(
   validateRequest({ body: clickSchema }),
   asyncHandler(async (req, res) => {
     const { selector, button, clickCount } = req.body;
+    logger.info(`Clicking ${selector} with ${button} button ${clickCount} time(s)`);
+    
     const page = await BrowserManager.getInstance().getPage();
-    await page.click(selector, { button, clickCount });
-    res.json({ success: true, selector });
+    
+    try {
+      await page.click(selector, { button, clickCount });
+      logger.info(`Successfully clicked ${selector}`);
+      res.json({ success: true, selector });
+    } catch (err: unknown) {
+      const error = err as Error;
+      logger.error(`Failed to click ${selector}:`, error);
+      throw new BadRequestError(`Failed to click ${selector}: ${error.message}`);
+    }
   })
 );
 
@@ -92,9 +121,19 @@ router.post(
   validateRequest({ body: typeSchema }),
   asyncHandler(async (req, res) => {
     const { selector, text, delay } = req.body;
+    logger.info(`Typing into ${selector} with delay ${delay}ms`);
+    
     const page = await BrowserManager.getInstance().getPage();
-    await page.type(selector, text, { delay });
-    res.json({ success: true, selector });
+    
+    try {
+      await page.type(selector, text, { delay });
+      logger.info(`Successfully typed into ${selector}`);
+      res.json({ success: true, selector });
+    } catch (err: unknown) {
+      const error = err as Error;
+      logger.error(`Failed to type into ${selector}:`, error);
+      throw new BadRequestError(`Failed to type into ${selector}: ${error.message}`);
+    }
   })
 );
 

@@ -40,3 +40,7 @@ coverage
 .temp
 .tmp
 *.pem
+
+#tasks
+tasks
+tasks/*
